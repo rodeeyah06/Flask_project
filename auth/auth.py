@@ -80,3 +80,4 @@ def register():
             cursor.close()
         if conn:
             conn.close()
+
