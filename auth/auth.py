@@ -81,3 +81,25 @@ def register():
         if conn:
             conn.close()
 
+
+@auth_bp.route("/verify-email/<token>", methods=["GET"])
+def verify_email(token):
+    cursor = None
+    conn = None
+    cursor = get_connection().cursor()
+
+    cursor.execute("SELECT * FROM users WHERE verification_token = %s", (token,))
+    user= cursor.fetchone()
+    if not user:
+        cursor.close()
+        return jsonify({"success": False, "message": "User does not exist"}), 404
+
+    cursor.execute("""UPDATE users set is_verified = True,verification_token = null where id =%s """,(user[0],)
+                   )
+    get_connection().commit()
+    cursor.close()
+
+    return jsonify({
+        "success": True,
+        "message": "User verified successfully."
+    })
